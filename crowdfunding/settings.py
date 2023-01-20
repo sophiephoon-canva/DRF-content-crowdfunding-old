@@ -21,14 +21,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '6f5fiv53l$d=%d_0_8&znvd!6&d3rfy-qowzswx^u)i-p_dsm6'
+SECRET_KEY = os.environ.get(
+  'DJANGO_SECRET_KEY',
+  '6f5fiv53l$d=%d_0_8&znvd!6&d3rfy-qowzswx^u)i-p_dsm6'
+)
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG') != 'False'
 
 ALLOWED_HOSTS = ['*']
 CORS_ALLOW_ALL_ORIGINS = True
+CSRF_TRUSTED_ORIGINS = ['https://*.fly.dev']
 
 
 # Application definition
@@ -37,6 +41,7 @@ INSTALLED_APPS = [
     'projects.apps.ProjectsConfig',
     'rest_framework',
     'rest_framework.authtoken',
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -59,7 +64,9 @@ REST_FRAMEWORK = {
 AUTH_USER_MODEL = 'users.CustomUser'
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -95,7 +102,7 @@ WSGI_APPLICATION = 'crowdfunding.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.environ.get('DATABASE_DIR', BASE_DIR / 'db.sqlite3'),
     }
 }
 
